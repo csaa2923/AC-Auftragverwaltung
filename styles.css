@@ -160,6 +160,14 @@ button:focus-visible, .button:focus-visible {
 }
 .error { min-height: 22px; color: var(--danger); }
 .auth-input { text-align: center; letter-spacing: .08em; }
+.auth-actions {
+  display: grid;
+  gap: 10px;
+  margin: 22px 0 12px;
+}
+.auth-actions button {
+  width: 100%;
+}
 
 .shell {
   display: grid;

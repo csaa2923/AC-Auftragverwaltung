@@ -8,15 +8,17 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body class="locked">
-  <section class="auth-screen" id="authScreen" aria-label="Passwortschutz">
+  <section class="auth-screen" id="authScreen" aria-label="Google Login">
     <form class="auth-card" id="authForm">
       <div class="brand-mark">ACT</div>
       <p class="eyebrow">Interner Bereich</p>
       <h1>Concierge Management Center</h1>
       <p class="muted">Alpine Concierge Tirol</p>
-      <label for="authPassword">Passwort</label>
-      <input id="authPassword" class="auth-input" type="password" autocomplete="current-password" autofocus>
-      <button type="submit">Einloggen</button>
+      <div class="auth-actions">
+        <button id="authGoogleLoginButton" type="button">Mit Google einloggen</button>
+        <button class="ghost" id="authAnonymousLoginButton" type="button">Testmodus</button>
+      </div>
+      <p class="legal-note">Mit demselben Google-Konto sehen iPhone, Windows-PC und Mac dieselben Daten.</p>
       <p class="error" id="authError" role="alert"></p>
     </form>
   </section>

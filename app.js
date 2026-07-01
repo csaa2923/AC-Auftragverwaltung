@@ -8,8 +8,9 @@ import {
 } from "./firebase-auth.js";
 import { getCloudUserId, initCloudStore, saveCloudState, stopCloudStore } from "./firebase-service.js";
 
-const PASSWORD = "ACT2026";
 const STORE_KEY = "act_management_center_v1";
+const SESSION_KEY = "act_cmc_google_unlocked";
+const LEGACY_SESSION_KEY = "act_cmc_unlocked";
 const STATUSES = [
   "Anfrage eingegangen",
   "Angebot erstellt",
@@ -203,24 +204,54 @@ function progressSteps(item) {
   ];
 }
 
+function unlockApp() {
+  sessionStorage.setItem(SESSION_KEY, "1");
+  sessionStorage.removeItem(LEGACY_SESSION_KEY);
+  document.body.classList.remove("locked");
+  document.getElementById("authScreen").style.display = "none";
+}
+function lockApp() {
+  sessionStorage.removeItem(SESSION_KEY);
+  sessionStorage.removeItem(LEGACY_SESSION_KEY);
+  document.body.classList.add("locked");
+  document.getElementById("authScreen").style.display = "flex";
+}
+function setAuthError(message) {
+  document.getElementById("authError").textContent = message || "";
+}
 function initAuth() {
-  const unlocked = sessionStorage.getItem("act_cmc_unlocked") === "1";
+  sessionStorage.removeItem(LEGACY_SESSION_KEY);
+  const unlocked = sessionStorage.getItem(SESSION_KEY) === "1" || Boolean(getCurrentFirebaseUser());
   document.body.classList.toggle("locked", !unlocked);
   document.getElementById("authScreen").style.display = unlocked ? "none" : "flex";
-  document.getElementById("authForm").addEventListener("submit", event => {
-    event.preventDefault();
-    if (document.getElementById("authPassword").value.trim() === PASSWORD) {
-      sessionStorage.setItem("act_cmc_unlocked", "1");
-      document.body.classList.remove("locked");
-      document.getElementById("authScreen").style.display = "none";
-    } else {
-      document.getElementById("authError").textContent = "Passwort ist nicht korrekt.";
-      document.getElementById("authPassword").select();
+  document.getElementById("authForm").addEventListener("submit", event => event.preventDefault());
+  document.getElementById("authGoogleLoginButton").addEventListener("click", async () => {
+    setAuthError("");
+    setSyncStatus({ mode: "local", message: "Google Login wird gestartet ..." });
+    try {
+      const user = await signInFirebaseWithGoogle();
+      if (user) unlockApp();
+    } catch (error) {
+      console.warn("Google Login fehlgeschlagen.", error);
+      setAuthError("Google Login fehlgeschlagen. Bitte Firebase-Einstellungen und Domain pruefen.");
+      setSyncStatus({ mode: "local", message: "Google Login fehlgeschlagen. Firebase-Einstellungen pruefen." });
+    }
+  });
+  document.getElementById("authAnonymousLoginButton").addEventListener("click", async () => {
+    if (!confirm("Testmodus starten? Dieser Modus ist nur fuer Tests gedacht und synchronisiert nicht automatisch mit deinen anderen Geraeten.")) return;
+    setAuthError("");
+    setSyncStatus({ mode: "local", message: "Testmodus wird gestartet ..." });
+    try {
+      const user = await signInFirebaseAnonymously();
+      if (user) unlockApp();
+    } catch (error) {
+      console.warn("Testmodus fehlgeschlagen.", error);
+      setAuthError("Testmodus fehlgeschlagen. Anonymous Auth pruefen.");
+      setSyncStatus({ mode: "local", message: "Testmodus fehlgeschlagen. Anonymous Auth pruefen." });
     }
   });
   document.getElementById("lockButton").addEventListener("click", () => {
-    sessionStorage.removeItem("act_cmc_unlocked");
-    location.reload();
+    lockApp();
   });
 }
 
@@ -273,7 +304,8 @@ function initEvents() {
     cloudConnecting = false;
     await signOutFirebaseUser();
     renderCloudUser(null);
-    setSyncStatus({ mode: "local", message: "Abgemeldet. Lokaler Speicher bleibt sichtbar." });
+    lockApp();
+    setSyncStatus({ mode: "local", message: "Abgemeldet. Bitte mit Google anmelden." });
   });
   document.getElementById("saveButton").addEventListener("click", saveState);
   document.getElementById("searchOrders").addEventListener("input", renderOrders);
@@ -696,7 +728,8 @@ async function startApp() {
   setSyncStatus({ mode: "local", message: "Bitte mit Google anmelden, um Cloud-Daten zu synchronisieren." });
 
   try {
-    await completeGoogleRedirectSignIn();
+    const redirectUser = await completeGoogleRedirectSignIn();
+    if (redirectUser) unlockApp();
   } catch (error) {
     console.warn("Google Redirect Login konnte nicht abgeschlossen werden.", error);
     setSyncStatus({ mode: "local", message: "Google Login nicht abgeschlossen. Firebase-Domain pruefen." });
@@ -705,6 +738,7 @@ async function startApp() {
   onFirebaseUserChanged(user => {
     renderCloudUser(user);
     if (user) {
+      unlockApp();
       stopCloudStore();
       cloudReady = false;
       connectCloudStore();

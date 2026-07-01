@@ -6,7 +6,6 @@ Eigenstaendige interne Seite fuer Alpine Concierge Tirol.
 
 - Startdatei lokal: `index.html`
 - Empfohlen: ueber lokalen Server, Vercel oder GitHub Pages oeffnen, nicht dauerhaft per `file://`
-- Passwort der internen Oberflaeche: `ACT2026`
 - Produktive Firebase-Anmeldung: Google Login
 - Anonymous Login: nur Testmodus/Fallback
 - Firestore-Datenpfad dieser App: `users/{uid}/apps/act-management-center/state`
@@ -108,8 +107,8 @@ Diese Rules in der Firebase Console veroeffentlichen:
 ## Test
 
 1. App ueber Vercel oder lokalen Server oeffnen.
-2. Mit `ACT2026` entsperren.
-3. Auf `Google Login` klicken und mit Google anmelden.
+2. Auf `Mit Google einloggen` klicken und mit Google anmelden.
+3. Falls die App bereits offen ist: oben kann mit `Logout` wieder zur Login-Maske gewechselt werden.
 4. Pruefen, ob oben `Cloud aktiv - UID ...` und die Google-Mail angezeigt werden.
 5. Auf Geraet A einen Kunden/Auftrag anlegen oder aendern.
 6. Auf Geraet B dieselbe App oeffnen und mit demselben Google-Konto anmelden.
