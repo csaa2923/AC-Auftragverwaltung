@@ -101,6 +101,45 @@ export async function loadDataAtPath({
   };
 }
 
+export async function saveDataAtPath({
+  pathParts,
+  data,
+  merge = true
+}) {
+  const user = await waitForFirebaseUser();
+  if (!user) throw new Error("Firebase Login erforderlich.");
+
+  const ref = documentRefFromPath(pathParts);
+  await setDoc(ref, {
+    data,
+    updatedAt: serverTimestamp(),
+    updatedBy: user.uid,
+    updatedByEmail: user.email || null
+  }, { merge });
+
+  return { user, ref };
+}
+
+export async function createDataAtPathIfMissing({
+  pathParts,
+  data
+}) {
+  const loaded = await loadDataAtPath({ pathParts, fallbackData: data });
+  if (loaded.exists) return loaded;
+
+  await setDoc(loaded.ref, {
+    data,
+    createdAt: serverTimestamp(),
+    createdBy: loaded.user.uid,
+    createdByEmail: loaded.user.email || null,
+    updatedAt: serverTimestamp(),
+    updatedBy: loaded.user.uid,
+    updatedByEmail: loaded.user.email || null
+  }, { merge: true });
+
+  return { ...loaded, data };
+}
+
 export async function createUserDataIfMissing({
   appKey,
   documentKey = "state",
@@ -133,6 +172,30 @@ export async function subscribeUserData({
   onError
 }) {
   const { user, ref } = await getCurrentUserDocument(appKey, documentKey);
+  const unsubscribe = onSnapshot(ref, snapshot => {
+    if (!snapshot.exists()) return;
+    onChange?.({
+      user,
+      ref,
+      data: normalize(snapshot.data().data ?? fallbackData),
+      snapshot
+    });
+  }, onError);
+
+  return { user, ref, unsubscribe };
+}
+
+export async function subscribeDataAtPath({
+  pathParts,
+  fallbackData = null,
+  normalize = value => value,
+  onChange,
+  onError
+}) {
+  const user = await waitForFirebaseUser();
+  if (!user) throw new Error("Firebase Login erforderlich.");
+
+  const ref = documentRefFromPath(pathParts);
   const unsubscribe = onSnapshot(ref, snapshot => {
     if (!snapshot.exists()) return;
     onChange?.({

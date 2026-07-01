@@ -8,7 +8,7 @@ Eigenstaendige interne Seite fuer Alpine Concierge Tirol.
 - Empfohlen lokal: `http://localhost:48731/index.html`, nicht `file://` und moeglichst nicht `127.0.0.1`
 - Produktive Firebase-Anmeldung: Google Login
 - Anonymous Login: nur Testmodus/Fallback
-- Firestore-Datenpfad dieser App: `users/{uid}/apps/act-management-center/state`
+- Firestore-Datenpfad dieser App: `workspaces/alpine-concierge-tirol/apps/act-management-center/state`
 
 ## Wiederverwendbare Firebase-Bibliothek
 
@@ -80,7 +80,7 @@ In der Firebase Console aktivieren:
 - Authentication > Sign-in method > Anonymous nur fuer Testmodus/Fallback
 - Authentication > Settings > Authorized domains: lokale/deployte Domains eintragen, z. B. `localhost`, Vercel-Domain und eigene Domain
 
-Damit iPhone, Windows-PC und Mac dieselben Daten sehen, auf allen Geraeten mit demselben Google-Konto anmelden. Die verwendete UID ist dann die UID dieses Google-Benutzers.
+Damit iPhone, Windows-PC und Mac dieselben Daten sehen, auf allen Geraeten mit einem freigegebenen Google-Konto anmelden. Alle freigegebenen Konten arbeiten im gemeinsamen Arbeitsbereich `alpine-concierge-tirol`.
 
 ## Google-Whitelist
 
@@ -106,12 +106,11 @@ Wichtig: Die E-Mail muss exakt zur Google-Anmeldung passen. Mehrere erlaubte Per
 
 ## Firebase Security Rules
 
-Die Regeln in `firestore.rules` erlauben Lesen und Schreiben nur fuer den angemeldeten und freigegebenen Benutzer:
+Die Regeln in `firestore.rules` erlauben Lesen und Schreiben im gemeinsamen Arbeitsbereich nur fuer angemeldete und freigegebene Google-Konten:
 
 ```txt
-match /users/{userId}/{document=**} {
+match /workspaces/alpine-concierge-tirol/{document=**} {
   allow read, write: if request.auth != null
-    && request.auth.uid == userId
     && request.auth.token.email in ["dein.name@gmail.com"];
 }
 ```
@@ -134,7 +133,7 @@ Diese Rules in der Firebase Console veroeffentlichen:
 1. App ueber Vercel oder lokalen Server oeffnen.
 2. Auf `Mit Google einloggen` klicken und mit Google anmelden.
 3. Falls die App bereits offen ist: oben kann mit `Logout` wieder zur Login-Maske gewechselt werden.
-4. Pruefen, ob oben `Cloud aktiv - UID ...` und die Google-Mail angezeigt werden.
+4. Pruefen, ob oben `Cloud aktiv - gemeinsamer Arbeitsbereich - UID ...` und die Google-Mail angezeigt werden.
 5. Auf Geraet A einen Kunden/Auftrag anlegen oder aendern.
 6. Auf Geraet B dieselbe App oeffnen und mit demselben Google-Konto anmelden.
 7. Pruefen, ob die Aenderung automatisch erscheint.

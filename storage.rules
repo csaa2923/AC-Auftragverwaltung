@@ -2,17 +2,24 @@ rules_version = '2';
 
 service firebase.storage {
   match /b/{bucket}/o {
-    function isAllowedUser(userId) {
+    function isAllowedEmail() {
       return request.auth != null
-        && request.auth.uid == userId
         && request.auth.token.email in [
           "holzer.wolfgang@gmail.com",
           "nawolaju@gmail.com"
         ];
     }
 
+    function isOwnUserPath(userId) {
+      return isAllowedEmail() && request.auth.uid == userId;
+    }
+
+    match /workspaces/alpine-concierge-tirol/{allPaths=**} {
+      allow read, write: if isAllowedEmail();
+    }
+
     match /users/{userId}/{allPaths=**} {
-      allow read, write: if isAllowedUser(userId);
+      allow read, write: if isOwnUserPath(userId);
     }
   }
 }

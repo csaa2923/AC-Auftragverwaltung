@@ -539,7 +539,7 @@ function setSyncStatus(status) {
     return;
   }
   if (status.mode === "cloud") {
-    el.textContent = `Cloud aktiv · UID ${status.uid}`;
+    el.textContent = `Cloud aktiv · gemeinsamer Arbeitsbereich · UID ${status.uid}`;
     el.className = "sync-status ok";
   } else {
     el.textContent = status.message || "localStorage-Fallback aktiv";
