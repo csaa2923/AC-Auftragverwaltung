@@ -29,6 +29,10 @@ export function userDocumentPath(uid, appKey, documentKey = "state") {
   return ["users", uid, "apps", appKey, documentKey];
 }
 
+export function documentRefFromPath(pathParts) {
+  return doc(firebaseDb, ...pathParts);
+}
+
 export async function getCurrentUserDocument(appKey, documentKey = "state") {
   const user = await waitForFirebaseUser();
   if (!user) throw new Error("Firebase Login erforderlich.");
@@ -71,6 +75,30 @@ export async function saveUserData({
     updatedAt: serverTimestamp()
   }, { merge });
   return { user, ref };
+}
+
+export async function loadDataAtPath({
+  pathParts,
+  fallbackData = null,
+  dataField = "data",
+  normalize = value => value
+}) {
+  const user = await waitForFirebaseUser();
+  if (!user) throw new Error("Firebase Login erforderlich.");
+
+  const ref = documentRefFromPath(pathParts);
+  const snapshot = await getDoc(ref);
+
+  if (!snapshot.exists()) {
+    return { user, ref, data: normalize(fallbackData), exists: false };
+  }
+
+  return {
+    user,
+    ref,
+    data: normalize(snapshot.data()[dataField] ?? fallbackData),
+    exists: true
+  };
 }
 
 export async function createUserDataIfMissing({
