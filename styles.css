@@ -265,6 +265,23 @@ main { padding: 28px; min-width: 0; }
   font-size: 14px;
   color: var(--gold-2);
 }
+.request-import {
+  display: grid;
+  gap: 10px;
+  margin: 0 0 14px;
+  padding: 12px;
+  border: 1px solid rgba(216,183,106,.24);
+  border-radius: 8px;
+  background: rgba(255,255,255,.035);
+}
+.request-import textarea {
+  min-height: 118px;
+}
+.import-result {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
 .milestone-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

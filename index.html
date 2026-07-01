@@ -92,6 +92,13 @@
       <section class="panel" id="customer">
         <form class="card form" id="customerForm">
           <h2>Kundenverwaltung</h2>
+          <div class="request-import">
+            <label for="requestImportText">Anfrage automatisch einlesen<textarea id="requestImportText" placeholder="Alpine Concierge Tirol Anfrage&#10;&#10;Service: Erleben &amp; Entdecken&#10;Region: Innsbruck&#10;Datum/Zeitraum: 23.08.2026&#10;Personen: 2 Erwachsene&#10;Nachricht: Restaurant"></textarea></label>
+            <div class="actions">
+              <button class="small" id="importRequestButton" type="button">Anfrage übernehmen</button>
+              <span class="import-result" id="requestImportResult"></span>
+            </div>
+          </div>
           <div class="status-panel" id="milestonePanel"></div>
           <div class="grid two">
             <label>Name<input data-field="customer.name" required></label>

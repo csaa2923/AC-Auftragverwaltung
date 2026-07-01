@@ -139,6 +139,29 @@ Diese Rules in der Firebase Console veroeffentlichen:
 7. Pruefen, ob die Aenderung automatisch erscheint.
 8. Kurz offline gehen, eine Aenderung vornehmen, wieder online gehen und Sync pruefen.
 
+## Test-Checkliste Anfrageimport
+
+1. In den Bereich `Kunde` wechseln.
+2. In `Anfrage automatisch einlesen` folgenden Text einfuegen:
+
+```txt
+Alpine Concierge Tirol Anfrage
+
+Service: Erleben & Entdecken
+Region: Innsbruck
+Datum/Zeitraum: 23.08.2026
+Personen: 2 Erwachsene
+Nachricht: Restaurant
+```
+
+3. Auf `Anfrage uebernehmen` klicken.
+4. Pruefen:
+   - `Hotel / Unterkunft` enthaelt `Innsbruck`.
+   - `Aufenthaltszeitraum` enthaelt exakt `23.08.2026`.
+   - `Anzahl Gaeste` enthaelt `2`.
+   - `Besondere Wuensche` enthaelt `Restaurant`.
+   - Im Angebot wurde eine Position mit Service `Erleben & Entdecken` vorbereitet.
+
 ## Wichtige Hinweise
 
 - Google Login ist der produktive Standard.

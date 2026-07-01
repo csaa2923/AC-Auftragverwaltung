@@ -109,6 +109,80 @@ function set(obj, path, value) {
   const target = keys.reduce((acc, key) => acc[key], obj);
   target[last] = value;
 }
+function parseRequestText(text) {
+  const result = { service: "", region: "", period: "", people: "", message: "" };
+  const labels = {
+    service: "service",
+    region: "region",
+    "datum/zeitraum": "period",
+    datum: "period",
+    zeitraum: "period",
+    personen: "people",
+    person: "people",
+    gäste: "people",
+    gaeste: "people",
+    nachricht: "message"
+  };
+
+  String(text || "").split(/\r?\n/).forEach(line => {
+    const match = line.match(/^\s*([^:]+)\s*:\s*(.*)\s*$/);
+    if (!match) return;
+    const key = labels[match[1].trim().toLowerCase()];
+    if (!key) return;
+    result[key] = match[2].trim();
+  });
+
+  return result;
+}
+function guestCountFromText(value) {
+  const match = String(value || "").match(/\d+/);
+  return match ? Number(match[0]) : "";
+}
+function matchingService(value) {
+  const normalized = String(value || "").trim().toLowerCase();
+  if (!normalized) return "";
+  return SERVICES.find(service => service.toLowerCase() === normalized) || SERVICES.find(service => service.toLowerCase().includes(normalized) || normalized.includes(service.toLowerCase())) || value.trim();
+}
+function importRequestText() {
+  const input = document.getElementById("requestImportText");
+  const result = document.getElementById("requestImportResult");
+  const parsed = parseRequestText(input?.value || "");
+  const current = order();
+  let changed = 0;
+
+  if (parsed.region) {
+    current.customer.hotel = parsed.region;
+    changed += 1;
+  }
+  if (parsed.period) {
+    current.customer.stay = parsed.period;
+    changed += 1;
+  }
+  if (parsed.people) {
+    const guests = guestCountFromText(parsed.people);
+    if (guests !== "") {
+      current.customer.guests = guests;
+      changed += 1;
+    }
+  }
+  if (parsed.message) {
+    current.customer.wishes = parsed.message;
+    changed += 1;
+  }
+  if (parsed.service) {
+    const service = matchingService(parsed.service);
+    const existing = current.offer.items.find(item => !item.description && Number(item.qty || 0) === 1 && Number(item.price || 0) === 0);
+    const item = existing || { id: uid(), service, description: "", qty: 1, price: 0 };
+    item.service = service;
+    item.description = parsed.message || item.description || "";
+    if (!existing) current.offer.items.push(item);
+    applyAutomaticStatus("offer");
+    changed += 1;
+  }
+
+  if (result) result.textContent = changed ? `${changed} Feld(er) übernommen.` : "Keine bekannten Felder erkannt.";
+  saveState();
+}
 function makeOrder(sequence = 1) {
   const next = sequence.toString().padStart(4, "0");
   return {
@@ -358,6 +432,7 @@ function initEvents() {
     setSyncStatus({ mode: "local", message: "Abgemeldet. Bitte mit Google anmelden." });
   });
   document.getElementById("saveButton").addEventListener("click", saveState);
+  document.getElementById("importRequestButton").addEventListener("click", importRequestText);
   document.getElementById("searchOrders").addEventListener("input", renderOrders);
   document.getElementById("showHiddenOrders").addEventListener("change", () => {
     renderDashboard();
