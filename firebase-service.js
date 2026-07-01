@@ -46,7 +46,7 @@ export async function initCloudStore({ localState, normalizeState, onRemoteState
     let initialState = normalizeState(initial.data || localState);
     const legacySources = [
       loadDataAtPath({
-        pathParts: ["users", initial.user.uid, "apps", APP_KEY, DOCUMENT_KEY],
+        pathParts: ["users", initial.user.uid, "apps", APP_KEY, "documents", DOCUMENT_KEY],
         dataField: "data",
         fallbackData: null,
         normalize: normalizeState

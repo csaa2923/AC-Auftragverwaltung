@@ -26,7 +26,7 @@ try {
 export const firebaseDb = firestoreDb;
 
 export function userDocumentPath(uid, appKey, documentKey = "state") {
-  return ["users", uid, "apps", appKey, documentKey];
+  return ["users", uid, "apps", appKey, "documents", documentKey];
 }
 
 export function documentRefFromPath(pathParts) {
