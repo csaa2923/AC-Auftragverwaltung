@@ -48,8 +48,13 @@
         <div>
           <p class="eyebrow">Interne Arbeitsoberfläche</p>
           <h1>Concierge Management Center</h1>
+          <p class="sync-status" id="syncStatus">Cloud-Synchronisierung wird gestartet ...</p>
         </div>
         <div class="top-actions">
+          <span class="user-chip" id="cloudUserChip">Nicht angemeldet</span>
+          <button id="googleLoginButton" type="button">Google Login</button>
+          <button class="ghost" id="anonymousLoginButton" type="button">Testmodus</button>
+          <button class="ghost" id="cloudLogoutButton" type="button">Logout</button>
           <button id="newOrderButton" type="button">Neuer Auftrag</button>
           <button class="ghost" id="saveButton" type="button">Speichern</button>
         </div>
@@ -59,7 +64,7 @@
         <div class="cards" id="dashboardCards"></div>
         <div class="split">
           <article class="card">
-            <h2>Aktuelle Vorgänge</h2>
+            <h2>Kunden, Angebote & Aufträge</h2>
             <div class="order-list compact" id="recentOrders"></div>
           </article>
           <article class="card">
@@ -73,7 +78,10 @@
       <section class="panel" id="orders">
         <div class="module-head">
           <h2>Auftragsübersicht</h2>
-          <input id="searchOrders" type="search" placeholder="Name, Angebot, Hotel oder Status suchen">
+          <div class="list-controls">
+            <input id="searchOrders" type="search" placeholder="Name, Angebot, Hotel oder Status suchen">
+            <label class="inline-check"><input id="showHiddenOrders" type="checkbox"> Ausgeblendete anzeigen</label>
+          </div>
         </div>
         <div class="order-list" id="orderList"></div>
       </section>
@@ -81,6 +89,7 @@
       <section class="panel" id="customer">
         <form class="card form" id="customerForm">
           <h2>Kundenverwaltung</h2>
+          <div class="status-panel" id="milestonePanel"></div>
           <div class="grid two">
             <label>Name<input data-field="customer.name" required></label>
             <label>Telefon / WhatsApp<input data-field="customer.phone" placeholder="+43 ..."></label>
@@ -188,6 +197,6 @@
     </main>
   </div>
 
-  <script src="app.js"></script>
+  <script type="module" src="app.js"></script>
 </body>
 </html>
