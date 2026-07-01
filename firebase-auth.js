@@ -34,7 +34,7 @@ export async function signInFirebaseWithGoogle() {
     const credential = await signInWithPopup(firebaseAuth, googleProvider);
     return credential.user;
   } catch (error) {
-    if (error.code === "auth/popup-blocked") {
+    if (["auth/popup-blocked", "auth/operation-not-supported-in-this-environment", "auth/cancelled-popup-request"].includes(error.code)) {
       await signInWithRedirect(firebaseAuth, googleProvider);
       return null;
     }

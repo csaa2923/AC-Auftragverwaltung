@@ -219,6 +219,29 @@ function lockApp() {
 function setAuthError(message) {
   document.getElementById("authError").textContent = message || "";
 }
+function firebaseLoginErrorMessage(error) {
+  const code = error?.code || "unbekannter Fehler";
+  if (code === "auth/unauthorized-domain") {
+    return "Google Login blockiert: Diese Domain ist in Firebase nicht freigegeben. Bitte localhost/Vercel-Domain in Firebase Authorized domains eintragen.";
+  }
+  if (code === "auth/popup-closed-by-user") {
+    return "Google Login wurde geschlossen. Bitte erneut versuchen und das Google-Fenster abschliessen.";
+  }
+  return `Google Login fehlgeschlagen (${code}). Bitte Firebase-Einstellungen pruefen.`;
+}
+function ensureGoogleAuthOrigin() {
+  if (location.protocol === "file:") {
+    setAuthError("Google Login funktioniert nicht direkt per Datei. Bitte http://localhost:48731/index.html oeffnen.");
+    setSyncStatus({ mode: "local", message: "Bitte ueber localhost oder Vercel oeffnen." });
+    return false;
+  }
+  if (location.hostname === "127.0.0.1") {
+    setAuthError("Wechsle auf localhost, weil Firebase Google Login dort zuverlaessiger erlaubt.");
+    location.href = `http://localhost:${location.port || "48731"}${location.pathname}${location.search}${location.hash}`;
+    return false;
+  }
+  return true;
+}
 function initAuth() {
   sessionStorage.removeItem(LEGACY_SESSION_KEY);
   const unlocked = sessionStorage.getItem(SESSION_KEY) === "1" || Boolean(getCurrentFirebaseUser());
@@ -227,14 +250,16 @@ function initAuth() {
   document.getElementById("authForm").addEventListener("submit", event => event.preventDefault());
   document.getElementById("authGoogleLoginButton").addEventListener("click", async () => {
     setAuthError("");
+    if (!ensureGoogleAuthOrigin()) return;
     setSyncStatus({ mode: "local", message: "Google Login wird gestartet ..." });
     try {
       const user = await signInFirebaseWithGoogle();
       if (user) unlockApp();
     } catch (error) {
       console.warn("Google Login fehlgeschlagen.", error);
-      setAuthError("Google Login fehlgeschlagen. Bitte Firebase-Einstellungen und Domain pruefen.");
-      setSyncStatus({ mode: "local", message: "Google Login fehlgeschlagen. Firebase-Einstellungen pruefen." });
+      const message = firebaseLoginErrorMessage(error);
+      setAuthError(message);
+      setSyncStatus({ mode: "local", message });
     }
   });
   document.getElementById("authAnonymousLoginButton").addEventListener("click", async () => {
@@ -280,12 +305,13 @@ function initEvents() {
     showTab("customer");
   });
   document.getElementById("googleLoginButton").addEventListener("click", async () => {
+    if (!ensureGoogleAuthOrigin()) return;
     setSyncStatus({ mode: "local", message: "Google Login wird gestartet ..." });
     try {
       await signInFirebaseWithGoogle();
     } catch (error) {
       console.warn("Google Login fehlgeschlagen.", error);
-      setSyncStatus({ mode: "local", message: "Google Login fehlgeschlagen. Firebase-Einstellungen pruefen." });
+      setSyncStatus({ mode: "local", message: firebaseLoginErrorMessage(error) });
     }
   });
   document.getElementById("anonymousLoginButton").addEventListener("click", async () => {
