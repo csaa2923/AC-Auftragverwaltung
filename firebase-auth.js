@@ -47,7 +47,7 @@ export async function signInFirebaseWithGoogle({ forceAccountSelection = false }
 
 export async function completeGoogleRedirectSignIn() {
   const credential = await getRedirectResult(firebaseAuth);
-  return credential?.user || firebaseAuth.currentUser || null;
+  return credential?.user || null;
 }
 
 export function waitForFirebaseUser({ anonymous = false } = {}) {
