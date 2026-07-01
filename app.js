@@ -9,7 +9,8 @@ import {
 import { getCloudUserId, initCloudStore, saveCloudState, stopCloudStore } from "./firebase-service.js";
 
 const STORE_KEY = "act_management_center_v1";
-const SESSION_KEY = "act_cmc_google_unlocked";
+const SESSION_KEY = "act_cmc_google_unlocked_v2";
+const PREVIOUS_SESSION_KEY = "act_cmc_google_unlocked";
 const LEGACY_SESSION_KEY = "act_cmc_unlocked";
 const STATUSES = [
   "Anfrage eingegangen",
@@ -206,12 +207,14 @@ function progressSteps(item) {
 
 function unlockApp() {
   sessionStorage.setItem(SESSION_KEY, "1");
+  sessionStorage.removeItem(PREVIOUS_SESSION_KEY);
   sessionStorage.removeItem(LEGACY_SESSION_KEY);
   document.body.classList.remove("locked");
   document.getElementById("authScreen").style.display = "none";
 }
 function lockApp() {
   sessionStorage.removeItem(SESSION_KEY);
+  sessionStorage.removeItem(PREVIOUS_SESSION_KEY);
   sessionStorage.removeItem(LEGACY_SESSION_KEY);
   document.body.classList.add("locked");
   document.getElementById("authScreen").style.display = "flex";
@@ -244,7 +247,8 @@ function ensureGoogleAuthOrigin() {
 }
 function initAuth() {
   sessionStorage.removeItem(LEGACY_SESSION_KEY);
-  const unlocked = sessionStorage.getItem(SESSION_KEY) === "1" || Boolean(getCurrentFirebaseUser());
+  sessionStorage.removeItem(PREVIOUS_SESSION_KEY);
+  const unlocked = sessionStorage.getItem(SESSION_KEY) === "1";
   document.body.classList.toggle("locked", !unlocked);
   document.getElementById("authScreen").style.display = unlocked ? "none" : "flex";
   document.getElementById("authForm").addEventListener("submit", event => event.preventDefault());
@@ -764,7 +768,6 @@ async function startApp() {
   onFirebaseUserChanged(user => {
     renderCloudUser(user);
     if (user) {
-      unlockApp();
       stopCloudStore();
       cloudReady = false;
       connectCloudStore();
