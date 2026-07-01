@@ -10,7 +10,7 @@ const APP_KEY = "act-management-center";
 const DOCUMENT_KEY = "state";
 const LEGACY_DOCUMENT_KEY = "app";
 const WORKSPACE_ID = "alpine-concierge-tirol";
-const WORKSPACE_PATH = ["workspaces", WORKSPACE_ID, "apps", APP_KEY, DOCUMENT_KEY];
+const WORKSPACE_PATH = ["workspaces", WORKSPACE_ID, "apps", APP_KEY, "documents", DOCUMENT_KEY];
 
 let unsubscribe = null;
 let saveTimer = null;

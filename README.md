@@ -8,7 +8,7 @@ Eigenstaendige interne Seite fuer Alpine Concierge Tirol.
 - Empfohlen lokal: `http://localhost:48731/index.html`, nicht `file://` und moeglichst nicht `127.0.0.1`
 - Produktive Firebase-Anmeldung: Google Login
 - Anonymous Login: nur Testmodus/Fallback
-- Firestore-Datenpfad dieser App: `workspaces/alpine-concierge-tirol/apps/act-management-center/state`
+- Firestore-Datenpfad dieser App: `workspaces/alpine-concierge-tirol/apps/act-management-center/documents/state`
 
 ## Wiederverwendbare Firebase-Bibliothek
 
