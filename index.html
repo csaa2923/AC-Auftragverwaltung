@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Concierge Management Center | Alpine Concierge Tirol</title>
+  <meta name="robots" content="noindex,nofollow">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="locked">
+  <section class="auth-screen" id="authScreen" aria-label="Passwortschutz">
+    <form class="auth-card" id="authForm">
+      <div class="brand-mark">ACT</div>
+      <p class="eyebrow">Interner Bereich</p>
+      <h1>Concierge Management Center</h1>
+      <p class="muted">Alpine Concierge Tirol</p>
+      <label for="authPassword">Passwort</label>
+      <input id="authPassword" class="auth-input" type="password" autocomplete="current-password" autofocus>
+      <button type="submit">Einloggen</button>
+      <p class="error" id="authError" role="alert"></p>
+    </form>
+  </section>
+
+  <div class="shell" id="app">
+    <aside class="sidebar">
+      <div class="logo-block">
+        <div class="brand-mark">ACT</div>
+        <div>
+          <strong>Alpine Concierge Tirol</strong>
+          <span>Management Center</span>
+        </div>
+      </div>
+      <nav class="tabs" aria-label="Module">
+        <button class="active" data-tab="dashboard">Dashboard</button>
+        <button data-tab="orders">Aufträge</button>
+        <button data-tab="customer">Kunde</button>
+        <button data-tab="offer">Angebot</button>
+        <button data-tab="whatsapp">WhatsApp</button>
+        <button data-tab="program">Programm</button>
+        <button data-tab="tasks">Aufgaben</button>
+        <button data-tab="backup">Backup</button>
+      </nav>
+      <button class="ghost" id="lockButton" type="button">Sperren</button>
+    </aside>
+
+    <main>
+      <header class="top">
+        <div>
+          <p class="eyebrow">Interne Arbeitsoberfläche</p>
+          <h1>Concierge Management Center</h1>
+        </div>
+        <div class="top-actions">
+          <button id="newOrderButton" type="button">Neuer Auftrag</button>
+          <button class="ghost" id="saveButton" type="button">Speichern</button>
+        </div>
+      </header>
+
+      <section class="panel active" id="dashboard">
+        <div class="cards" id="dashboardCards"></div>
+        <div class="split">
+          <article class="card">
+            <h2>Aktuelle Vorgänge</h2>
+            <div class="order-list compact" id="recentOrders"></div>
+          </article>
+          <article class="card">
+            <h2>Statuslogik</h2>
+            <p class="legal-note">Anfragen sind unverbindlich. Eine Buchung wird erst nach klarer Kundenbestätigung und Zahlung verbindlich. Die Organisation startet erst nach Zahlungseingang.</p>
+            <ol class="status-flow" id="statusFlow"></ol>
+          </article>
+        </div>
+      </section>
+
+      <section class="panel" id="orders">
+        <div class="module-head">
+          <h2>Auftragsübersicht</h2>
+          <input id="searchOrders" type="search" placeholder="Name, Angebot, Hotel oder Status suchen">
+        </div>
+        <div class="order-list" id="orderList"></div>
+      </section>
+
+      <section class="panel" id="customer">
+        <form class="card form" id="customerForm">
+          <h2>Kundenverwaltung</h2>
+          <div class="grid two">
+            <label>Name<input data-field="customer.name" required></label>
+            <label>Telefon / WhatsApp<input data-field="customer.phone" placeholder="+43 ..."></label>
+            <label>E-Mail optional<input data-field="customer.email" type="email"></label>
+            <label>Hotel / Unterkunft<input data-field="customer.hotel"></label>
+            <label>Aufenthaltszeitraum<input data-field="customer.stay"></label>
+            <label>Sprache<select data-field="customer.language"><option>Deutsch</option><option>Englisch</option><option>Italienisch</option></select></label>
+            <label>Anzahl Gäste<input data-field="customer.guests" type="number" min="1"></label>
+            <label>Kundentyp<select data-field="customer.type"><option>Standard</option><option>VIP</option></select></label>
+          </div>
+          <label>Besondere Wünsche<textarea data-field="customer.wishes"></textarea></label>
+          <label>Interne Notizen<textarea data-field="customer.notes"></textarea></label>
+        </form>
+      </section>
+
+      <section class="panel" id="offer">
+        <div class="split">
+          <form class="card form">
+            <h2>Angebotslegung</h2>
+            <div class="grid two">
+              <label>Angebotsnummer<input data-field="offer.number" readonly></label>
+              <label>Gültig bis<input data-field="offer.validUntil" type="date"></label>
+              <label>Zahlungsmodell<select data-field="offer.paymentModel"><option>100 % Vorauszahlung</option><option>Anzahlung</option><option>Restzahlung</option><option>individuelle Vereinbarung</option></select></label>
+              <label>Zahlungslink<input data-field="offer.paymentLink" placeholder="Stripe, SumUp, PayPal oder manueller Link"></label>
+              <label>Zahlungsstatus<select data-field="offer.paymentStatus"><option>Zahlung offen</option><option>Zahlung erhalten</option></select></label>
+              <label>Status<select data-field="status" id="statusSelect"></select></label>
+            </div>
+            <div class="line-head">
+              <h3>Positionen</h3>
+              <button class="small" id="addItemButton" type="button">Position hinzufügen</button>
+            </div>
+            <div id="itemsEditor"></div>
+            <div class="total-row"><span>Gesamtpreis</span><strong id="totalPrice">0,00 €</strong></div>
+          </form>
+          <article class="card printable" id="offerPrint">
+            <div class="print-title">
+              <span>Alpine Concierge Tirol</span>
+              <h2>Angebot</h2>
+            </div>
+            <div id="offerPreview"></div>
+            <button id="printOfferButton" type="button">Angebot drucken / PDF</button>
+          </article>
+        </div>
+      </section>
+
+      <section class="panel" id="whatsapp">
+        <div class="card">
+          <h2>WhatsApp-Buchungsprozess</h2>
+          <div class="grid two">
+            <label>Textbaustein<select id="waTemplate"></select></label>
+            <label>Direktlink<input id="waLink" readonly></label>
+          </div>
+          <textarea id="waText" class="message-box" readonly></textarea>
+          <div class="actions">
+            <button id="copyWaButton" type="button">Text kopieren</button>
+            <a class="button ghost" id="openWaButton" target="_blank" rel="noopener">WhatsApp öffnen</a>
+            <button class="ghost" id="markOfferSentButton" type="button">Angebot als versendet markieren</button>
+            <button class="ghost" id="markConfirmedButton" type="button">Kunde hat bestätigt</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" id="program">
+        <div class="split">
+          <article class="card">
+            <div class="line-head">
+              <h2>Programmzusammenstellung</h2>
+              <button class="small" id="addProgramButton" type="button">Programmpunkt hinzufügen</button>
+            </div>
+            <div id="programEditor"></div>
+          </article>
+          <article class="card printable" id="programPrint">
+            <div class="print-title">
+              <span>Alpine Concierge Tirol</span>
+              <h2>Tagesprogramm</h2>
+            </div>
+            <div id="programPreview"></div>
+            <button id="printProgramButton" type="button">Tagesprogramm drucken / PDF</button>
+          </article>
+        </div>
+      </section>
+
+      <section class="panel" id="tasks">
+        <article class="card">
+          <div class="line-head">
+            <h2>Aufgaben & Reservierungen</h2>
+            <button class="small" id="addTaskButton" type="button">Eigene Aufgabe</button>
+          </div>
+          <div class="task-list" id="taskList"></div>
+        </article>
+      </section>
+
+      <section class="panel" id="backup">
+        <article class="card">
+          <h2>Lokale Speicherung & Backup</h2>
+          <p class="legal-note">Alle Daten werden lokal in diesem Browser gespeichert. Für regelmäßige Sicherungen bitte JSON exportieren.</p>
+          <div class="actions">
+            <button id="exportButton" type="button">JSON exportieren</button>
+            <label class="button ghost" for="importFile">JSON importieren</label>
+            <input id="importFile" type="file" accept="application/json,.json" hidden>
+          </div>
+          <pre id="backupInfo"></pre>
+        </article>
+      </section>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
