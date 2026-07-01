@@ -207,7 +207,7 @@ function progressSteps(item) {
 }
 
 function unlockApp() {
-  sessionStorage.setItem(SESSION_KEY, "1");
+  sessionStorage.removeItem(SESSION_KEY);
   sessionStorage.removeItem(PREVIOUS_SESSION_KEY);
   sessionStorage.removeItem(LEGACY_SESSION_KEY);
   document.body.classList.remove("locked");
@@ -259,18 +259,18 @@ function ensureGoogleAuthOrigin() {
   return true;
 }
 function initAuth() {
+  sessionStorage.removeItem(SESSION_KEY);
   sessionStorage.removeItem(LEGACY_SESSION_KEY);
   sessionStorage.removeItem(PREVIOUS_SESSION_KEY);
-  const unlocked = sessionStorage.getItem(SESSION_KEY) === "1";
-  document.body.classList.toggle("locked", !unlocked);
-  document.getElementById("authScreen").style.display = unlocked ? "none" : "flex";
+  document.body.classList.add("locked");
+  document.getElementById("authScreen").style.display = "flex";
   document.getElementById("authForm").addEventListener("submit", event => event.preventDefault());
   document.getElementById("authGoogleLoginButton").addEventListener("click", async () => {
     setAuthError("");
     if (!ensureGoogleAuthOrigin()) return;
     setSyncStatus({ mode: "local", message: "Google Login wird gestartet ..." });
     try {
-      const user = await signInFirebaseWithGoogle();
+      const user = await signInFirebaseWithGoogle({ forceAccountSelection: true });
       if (user && await enforceAllowedUser(user)) unlockApp();
     } catch (error) {
       console.warn("Google Login fehlgeschlagen.", error);
@@ -331,7 +331,7 @@ function initEvents() {
     if (!ensureGoogleAuthOrigin()) return;
     setSyncStatus({ mode: "local", message: "Google Login wird gestartet ..." });
     try {
-      const user = await signInFirebaseWithGoogle();
+      const user = await signInFirebaseWithGoogle({ forceAccountSelection: true });
       if (user) await enforceAllowedUser(user);
     } catch (error) {
       console.warn("Google Login fehlgeschlagen.", error);

@@ -28,8 +28,11 @@ export async function signInFirebaseAnonymously() {
   return credential.user;
 }
 
-export async function signInFirebaseWithGoogle() {
-  if (firebaseAuth.currentUser && !firebaseAuth.currentUser.isAnonymous) return firebaseAuth.currentUser;
+export async function signInFirebaseWithGoogle({ forceAccountSelection = false } = {}) {
+  if (forceAccountSelection && firebaseAuth.currentUser) {
+    await signOut(firebaseAuth);
+  }
+  if (!forceAccountSelection && firebaseAuth.currentUser && !firebaseAuth.currentUser.isAnonymous) return firebaseAuth.currentUser;
   try {
     const credential = await signInWithPopup(firebaseAuth, googleProvider);
     return credential.user;
