@@ -292,8 +292,14 @@ function initAuth() {
       setSyncStatus({ mode: "local", message: "Testmodus fehlgeschlagen. Anonymous Auth pruefen." });
     }
   });
-  document.getElementById("lockButton").addEventListener("click", () => {
+  document.getElementById("lockButton").addEventListener("click", async () => {
+    stopCloudStore();
+    cloudReady = false;
+    cloudConnecting = false;
+    await signOutFirebaseUser();
+    renderCloudUser(null);
     lockApp();
+    setSyncStatus({ mode: "local", message: "Abgemeldet. Bitte mit Google anmelden." });
   });
 }
 
