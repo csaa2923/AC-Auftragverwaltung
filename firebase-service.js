@@ -22,6 +22,20 @@ function orderCount(state) {
   return Array.isArray(state?.orders) ? state.orders.length : 0;
 }
 
+function firebaseStoreErrorMessage(error) {
+  const code = error?.code || "";
+  if (code === "permission-denied") {
+    return "Firestore blockiert: Rules fuer gemeinsamen Arbeitsbereich veroeffentlichen.";
+  }
+  if (code === "unauthenticated") {
+    return "Firestore wartet auf Google Login.";
+  }
+  if (code === "unavailable") {
+    return "Firestore derzeit nicht erreichbar. Lokaler Speicher aktiv.";
+  }
+  return `Firebase nicht verbunden${code ? ` (${code})` : ""}. Lokaler Speicher aktiv.`;
+}
+
 export async function initCloudStore({ localState, normalizeState, onRemoteState, onStatus }) {
   try {
     const initial = await createDataAtPathIfMissing({
@@ -74,7 +88,7 @@ export async function initCloudStore({ localState, normalizeState, onRemoteState
       },
       onError(error) {
         console.warn("Firestore Echtzeit-Sync fehlgeschlagen.", error);
-        onStatus?.({ mode: "local", uid: null, message: "Firestore-Sync unterbrochen" });
+        onStatus?.({ mode: "local", uid: null, message: firebaseStoreErrorMessage(error) });
       }
     });
 
@@ -84,7 +98,7 @@ export async function initCloudStore({ localState, normalizeState, onRemoteState
     console.warn("Firebase nicht verfuegbar, localStorage-Fallback aktiv.", error);
     ready = false;
     onlineAvailable = false;
-    onStatus?.({ mode: "local", uid: null, message: "Offline/localStorage-Fallback" });
+    onStatus?.({ mode: "local", uid: null, message: firebaseStoreErrorMessage(error) });
     return { state: localState, uid: null, online: false, error };
   }
 }
@@ -103,6 +117,8 @@ export function saveCloudState(state) {
       });
     } catch (error) {
       console.warn("Speichern in Firestore fehlgeschlagen.", error);
+      ready = false;
+      onlineAvailable = false;
     }
   }, 350);
 }
