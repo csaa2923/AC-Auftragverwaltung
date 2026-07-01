@@ -6,6 +6,7 @@ import {
   signInFirebaseWithGoogle,
   signOutFirebaseUser
 } from "./firebase-auth.js";
+import { firebaseAccessDeniedMessage, isAllowedFirebaseUser } from "./firebase-access.js";
 import { getCloudUserId, initCloudStore, saveCloudState, stopCloudStore } from "./firebase-service.js";
 
 const STORE_KEY = "act_management_center_v1";
@@ -222,6 +223,18 @@ function lockApp() {
 function setAuthError(message) {
   document.getElementById("authError").textContent = message || "";
 }
+async function enforceAllowedUser(user) {
+  if (isAllowedFirebaseUser(user)) return true;
+  const message = firebaseAccessDeniedMessage(user);
+  stopCloudStore();
+  cloudReady = false;
+  cloudConnecting = false;
+  await signOutFirebaseUser();
+  lockApp();
+  setAuthError(message);
+  setSyncStatus({ mode: "local", message });
+  return false;
+}
 function firebaseLoginErrorMessage(error) {
   const code = error?.code || "unbekannter Fehler";
   if (code === "auth/unauthorized-domain") {
@@ -258,7 +271,7 @@ function initAuth() {
     setSyncStatus({ mode: "local", message: "Google Login wird gestartet ..." });
     try {
       const user = await signInFirebaseWithGoogle();
-      if (user) unlockApp();
+      if (user && await enforceAllowedUser(user)) unlockApp();
     } catch (error) {
       console.warn("Google Login fehlgeschlagen.", error);
       const message = firebaseLoginErrorMessage(error);
@@ -272,7 +285,7 @@ function initAuth() {
     setSyncStatus({ mode: "local", message: "Testmodus wird gestartet ..." });
     try {
       const user = await signInFirebaseAnonymously();
-      if (user) unlockApp();
+      if (user && await enforceAllowedUser(user)) unlockApp();
     } catch (error) {
       console.warn("Testmodus fehlgeschlagen.", error);
       setAuthError("Testmodus fehlgeschlagen. Anonymous Auth pruefen.");
@@ -312,7 +325,8 @@ function initEvents() {
     if (!ensureGoogleAuthOrigin()) return;
     setSyncStatus({ mode: "local", message: "Google Login wird gestartet ..." });
     try {
-      await signInFirebaseWithGoogle();
+      const user = await signInFirebaseWithGoogle();
+      if (user) await enforceAllowedUser(user);
     } catch (error) {
       console.warn("Google Login fehlgeschlagen.", error);
       setSyncStatus({ mode: "local", message: firebaseLoginErrorMessage(error) });
@@ -759,7 +773,7 @@ async function startApp() {
 
   try {
     const redirectUser = await completeGoogleRedirectSignIn();
-    if (redirectUser) unlockApp();
+    if (redirectUser && await enforceAllowedUser(redirectUser)) unlockApp();
   } catch (error) {
     console.warn("Google Redirect Login konnte nicht abgeschlossen werden.", error);
     setSyncStatus({ mode: "local", message: "Google Login nicht abgeschlossen. Firebase-Domain pruefen." });
@@ -768,6 +782,10 @@ async function startApp() {
   onFirebaseUserChanged(user => {
     renderCloudUser(user);
     if (user) {
+      if (!isAllowedFirebaseUser(user)) {
+        enforceAllowedUser(user);
+        return;
+      }
       stopCloudStore();
       cloudReady = false;
       connectCloudStore();

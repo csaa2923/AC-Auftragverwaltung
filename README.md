@@ -16,6 +16,7 @@ Die Firebase-Integration ist modular aufgebaut, damit zukuenftige HTML-Apps dies
 
 - `firebase-config.js`: zentrale Firebase-Konfiguration und App-Initialisierung.
 - `firebase-auth.js`: Google Login, Anonymous-Testmodus, aktueller Benutzer, Auth-Status und Logout.
+- `firebase-access.js`: Google-E-Mail-Whitelist fuer den App-Zugang.
 - `firebase-database.js`: Firestore mit Offline-Unterstuetzung, Laden, Speichern, Loeschen und Echtzeit-Sync pro Benutzer/App.
 - `firebase-storage.js`: vorbereitete Dateiablage pro Benutzer/App.
 - `firebase-service.js`: schmaler Adapter fuer diese konkrete Auftragsverwaltung.
@@ -81,17 +82,41 @@ In der Firebase Console aktivieren:
 
 Damit iPhone, Windows-PC und Mac dieselben Daten sehen, auf allen Geraeten mit demselben Google-Konto anmelden. Die verwendete UID ist dann die UID dieses Google-Benutzers.
 
+## Google-Whitelist
+
+Vor produktiver Nutzung die erlaubte Google-Mail eintragen:
+
+1. In `firebase-access.js`:
+
+```js
+export const ALLOWED_GOOGLE_EMAILS = [
+  "dein.name@gmail.com"
+];
+```
+
+2. In `firestore.rules` und `storage.rules` denselben Wert eintragen:
+
+```txt
+request.auth.token.email in [
+  "dein.name@gmail.com"
+]
+```
+
+Wichtig: Die E-Mail muss exakt zur Google-Anmeldung passen. Mehrere erlaubte Personen koennen als weitere Eintraege ergaenzt werden.
+
 ## Firebase Security Rules
 
-Die Regeln in `firestore.rules` erlauben Lesen und Schreiben nur fuer den angemeldeten Benutzer:
+Die Regeln in `firestore.rules` erlauben Lesen und Schreiben nur fuer den angemeldeten und freigegebenen Benutzer:
 
 ```txt
 match /users/{userId}/{document=**} {
-  allow read, write: if request.auth != null && request.auth.uid == userId;
+  allow read, write: if request.auth != null
+    && request.auth.uid == userId
+    && request.auth.token.email in ["dein.name@gmail.com"];
 }
 ```
 
-Die Regeln in `storage.rules` schuetzen Dateien nach demselben Prinzip:
+Die Regeln in `storage.rules` schuetzen Dateien nach demselben Prinzip.
 
 ```txt
 match /users/{userId}/{allPaths=**} {
