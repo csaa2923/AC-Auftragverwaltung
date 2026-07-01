@@ -591,7 +591,7 @@ async function connectCloudStore() {
   selectedId = state.selectedId || state.orders[0].id;
   localStorage.setItem(STORE_KEY, JSON.stringify(state));
   render();
-  setSyncStatus(cloud.online ? { mode: "cloud", uid: getCloudUserId(), message: "Firebase verbunden" } : { mode: "local", message: "localStorage-Fallback aktiv" });
+  setSyncStatus(cloud.online ? { mode: "cloud", uid: getCloudUserId(), message: "Firebase verbunden" } : { mode: "local", message: cloud.message || "localStorage-Fallback aktiv" });
 }
 function renderDashboard() {
   const visibleOrders = state.orders.filter(item => !item.hidden);

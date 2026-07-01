@@ -98,8 +98,9 @@ export async function initCloudStore({ localState, normalizeState, onRemoteState
     console.warn("Firebase nicht verfuegbar, localStorage-Fallback aktiv.", error);
     ready = false;
     onlineAvailable = false;
-    onStatus?.({ mode: "local", uid: null, message: firebaseStoreErrorMessage(error) });
-    return { state: localState, uid: null, online: false, error };
+    const message = firebaseStoreErrorMessage(error);
+    onStatus?.({ mode: "local", uid: null, message });
+    return { state: localState, uid: null, online: false, error, message };
   }
 }
 
