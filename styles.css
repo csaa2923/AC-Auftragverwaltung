@@ -480,16 +480,144 @@ pre { white-space: pre-wrap; color: var(--muted); }
   .order-tools { justify-content: flex-start; }
 }
 @media (max-width: 720px) {
-  main, .sidebar { padding: 16px; }
+  body { background: var(--green); }
+  main, .sidebar { padding: 12px; }
+  .sidebar {
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+    background: rgba(2, 17, 14, .96);
+  }
+  .logo-block {
+    grid-template-columns: 42px 1fr;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .logo-block .brand-mark {
+    width: 40px;
+    height: 40px;
+    font-size: 12px;
+  }
+  .logo-block strong { font-size: 14px; }
+  .logo-block span { font-size: 11px; }
+  .tabs {
+    display: flex;
+    gap: 8px;
+    margin: 0 -12px 12px;
+    padding: 0 12px 6px;
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
+  .tabs button {
+    flex: 0 0 auto;
+    min-height: 34px;
+    padding: 7px 11px;
+    font-size: 13px;
+    white-space: nowrap;
+  }
+  #lockButton {
+    width: auto;
+    min-height: 32px;
+    padding: 6px 10px;
+  }
   .top, .module-head { grid-template-columns: 1fr; display: grid; }
-  .tabs, .split, .cards, .grid.two { grid-template-columns: 1fr; }
+  .top {
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+  .top h1 {
+    font-size: clamp(30px, 11vw, 42px);
+    overflow-wrap: anywhere;
+  }
+  .eyebrow {
+    font-size: 10px;
+    letter-spacing: .12em;
+  }
+  .sync-status {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+  .top-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .top-actions .user-chip,
+  .top-actions #newOrderButton {
+    grid-column: 1 / -1;
+  }
+  .tabs, .split, .grid.two { grid-template-columns: 1fr; }
+  .cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .stat {
+    min-height: 72px;
+    padding: 10px;
+  }
+  .stat span {
+    display: block;
+    min-height: 30px;
+    font-size: 11px;
+    line-height: 1.25;
+  }
+  .stat strong {
+    margin-top: 4px;
+    font-size: clamp(18px, 7vw, 24px);
+    line-height: 1.05;
+    overflow-wrap: anywhere;
+  }
+  #dashboard .split {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  #dashboard .card {
+    padding: 12px;
+  }
+  #dashboard .card h2 {
+    margin-bottom: 10px;
+    font-size: 22px;
+    line-height: 1.1;
+  }
+  #dashboard .card:nth-child(2) {
+    display: none;
+  }
   .item-row, .program-row, .task-row, .milestone-grid { grid-template-columns: 1fr; }
   .order-card { grid-template-columns: 1fr; }
-  .top-actions button, .actions button, .actions .button, .tabs button, #lockButton { width: 100%; }
+  .top-actions button, .actions button, .actions .button { width: 100%; }
   .user-chip { width: 100%; max-width: none; justify-content: center; }
+  .compact .order-card {
+    padding: 10px;
+  }
+  .order-card strong {
+    display: block;
+    font-size: 18px;
+    line-height: 1.2;
+  }
+  .order-card small {
+    font-size: 12px;
+    overflow-wrap: anywhere;
+  }
+  .progress-tags {
+    gap: 4px;
+    margin-top: 8px;
+  }
+  .step {
+    min-height: 22px;
+    padding: 3px 7px;
+    font-size: 10px;
+  }
   .order-tools { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .order-tools .pill { grid-column: 1 / -1; justify-content: center; }
-  .order-tools button { width: 100%; }
+  .order-tools button {
+    width: 100%;
+    min-height: 32px;
+    font-size: 11px;
+  }
+  .pill {
+    min-height: 26px;
+    font-size: 11px;
+    text-align: center;
+  }
 }
 
 @media print {
